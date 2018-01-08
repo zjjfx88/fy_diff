@@ -1,0 +1,59 @@
+#!/usr/bin/python
+#coding=UTF-8
+#author=zhangjj
+
+import ConfigParser
+
+class ConfReader:
+	conffile=""
+	def __init__(self,filepath):
+		self.conffile=filepath
+
+	def getAllSec(self):
+		'Get all sections in config file'
+		try:
+			return self._readconf().sections()
+		except Exception,e:
+			return "Read section error",e
+
+	def _readconf(self):
+		cf = ConfigParser.ConfigParser()
+		cf.read(self.conffile)
+		return cf
+
+	def getOpt(self,section):
+		'Get options under a known section'
+		try:
+			return self._readconf().options(section)
+		except Exception,e:
+			return "Read option error",e
+	def getAllOpt(self):
+		'Get all options in config file,it is a list'
+		allOpt=list()
+		try:
+			for sec in self.getAllSec():
+				for opt in self.getOpt(sec):
+					allOpt.append(opt)
+			return allOpt
+		except Exception,e:
+			return "Read all options error",e
+	def getItem(self,section):
+		'Get Items under a known section'
+		try:
+			return dict(self._readconf().items(section))
+		except Exception,e:
+			return "Read Item error",e
+
+	def getKey(self,section,key):
+		'Get value by  given section and key'
+		try:
+			if section in self.getAllSec():
+				allkey=self.getItem(section)
+			else:
+				return "Section is wrong"
+			if key in allkey:
+				return allkey[key]
+			else:
+				return "Key is wrong"
+		except Exception,e:
+			return "Read key error",e
