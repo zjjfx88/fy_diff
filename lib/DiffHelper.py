@@ -85,7 +85,7 @@ def getHtmlDiff():
 #    print type(testfile)
     print diffbase
     print difftest
-    diff=difflib.HtmlDiff.make_file(difflib.HtmlDiff(),[diffbase,],[difftest,])
+    diff=difflib.HtmlDiff.make_file(difflib.HtmlDiff(),diffbase,difftest)
     k = BeautifulSoup(diff, "html.parser")
     #print k
     with open('diff.html','w') as diffres:
