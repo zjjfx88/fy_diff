@@ -1,4 +1,7 @@
 alltj*
-./lib/*.html
+lib/*.html
 json
-./lib/*.pyc
+lib/*.pyc
+xml
+lib/__pycache__
+
