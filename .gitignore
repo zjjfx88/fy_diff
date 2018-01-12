@@ -1,2 +1,4 @@
-alltj_result*
-./lib/diff.html
+alltj*
+./lib/*.html
+json
+./lib/*.pyc

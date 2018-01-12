@@ -72,7 +72,7 @@ def readJsonFile(jsonreqfile,jsonresfile,testHost,testPort,isParsereq='yes',isPa
 
 def readAlltjFile(alltjreqFile,alltjresFile,testHost,testPort,isParsereq='yes',isParseres='yes'):
     alltj_info=dict()
-    with open(alltjreqFile,'r') as inalltjf,open(alltjresFile,'a') as outalltjf:
+    with open(alltjreqFile,'r') as inalltjf,open(alltjresFile,'w',encoding='utf-8') as outalltjf:
         for line in inalltjf.readlines():
             alltjInfo=line.strip().split('===')
             alltj_info['num']=alltjInfo[0]
@@ -81,13 +81,18 @@ def readAlltjFile(alltjreqFile,alltjresFile,testHost,testPort,isParsereq='yes',i
                 alltj_info['req_from']=temp['from_lang']
                 alltj_info['req_to']=temp['to_lang']
             res=SendQuery.sendreq(alltjInfo[1],'alltrans_json',testHost,testPort)
+#            print(res)
+#            print(type(res))
             if isParseres=='yes':
-                resparse=json.loads(res)
+                resparse=json.loads(res.decode('utf-8'))
                 result=resparse['trans_result']
                 resp_doc_lst=list()
                 for sub_res in result:
                     resp_doc_lst.append((sub_res['model'],sub_res['trans_text'],sub_res['sendback']))
                 alltj_info['subres']=resp_doc_lst
             else:
-                alltj_info['subres']=res
+                alltj_info['subres']=res.decode('utf-8')
+
+        print(type(alltj_info))
+        print(type(str(alltj_info).encode()))
         outalltjf.write(str(alltj_info))

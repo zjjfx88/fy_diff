@@ -26,7 +26,7 @@ if __name__ == "__main__":
     isParsereq=globalcfg['parse_req']
     isParseres=globalcfg['parse_res']
     runmode=globalcfg['run']
-    print runmode
+    print(runmode)
     if runmode=='all':
         testcfg=readconf.getItem('test')
         testHost=testcfg['test_host']

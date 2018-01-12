@@ -2,7 +2,7 @@
 #coding=UTF-8
 #author=zhangjj
 
-import ConfigParser
+import configparser
 
 class ConfReader:
 	conffile=""
@@ -13,11 +13,11 @@ class ConfReader:
 		'Get all sections in config file'
 		try:
 			return self._readconf().sections()
-		except Exception,e:
+		except Exception as e:
 			return "Read section error",e
 
 	def _readconf(self):
-		cf = ConfigParser.ConfigParser()
+		cf = configparser.ConfigParser()
 		cf.read(self.conffile)
 		return cf
 
@@ -25,7 +25,7 @@ class ConfReader:
 		'Get options under a known section'
 		try:
 			return self._readconf().options(section)
-		except Exception,e:
+		except Exception as e:
 			return "Read option error",e
 	def getAllOpt(self):
 		'Get all options in config file,it is a list'
@@ -35,13 +35,13 @@ class ConfReader:
 				for opt in self.getOpt(sec):
 					allOpt.append(opt)
 			return allOpt
-		except Exception,e:
+		except Exception as e:
 			return "Read all options error",e
 	def getItem(self,section):
 		'Get Items under a known section'
 		try:
 			return dict(self._readconf().items(section))
-		except Exception,e:
+		except Exception as e:
 			return "Read Item error",e
 
 	def getKey(self,section,key):
@@ -55,5 +55,5 @@ class ConfReader:
 				return allkey[key]
 			else:
 				return "Key is wrong"
-		except Exception,e:
+		except Exception as e:
 			return "Read key error",e

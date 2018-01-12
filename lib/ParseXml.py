@@ -11,7 +11,7 @@ def parseXmlReq(xml_str):
          'v2':'http://api.microsofttranslator.com/V2'}
     try:
         root=ElementTree.fromstring(xml_str)
-    except Exception,e:
+    except Exception as e:
         query_lst_info['wrongreq']='wrong request,reson:'+str(e)
         return query_lst_info
     for node in root.findall('soapenv:Body',xmlns):
@@ -35,7 +35,7 @@ def parseXmlRes(xml_str):
     ns={'parent':'http://schemas.xmlsoap.org/soap/envelope/','child':'http://fanyi.sogou.com/'}
     try:
         root=ElementTree.fromstring(xml_str)
-    except Exception,e:
+    except Exception as e:
         result_dic['wrongres']='wrongres:'+str(e)
         return result_dic
     for node in root.findall('parent:Body',ns):

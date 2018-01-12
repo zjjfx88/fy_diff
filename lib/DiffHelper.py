@@ -2,114 +2,146 @@
 #coding=UTF-8
 #author=zhangjj
 import subprocess
-import difflib,os
+import difflib,os,sys,re
 from bs4 import BeautifulSoup
+difflist=[]
 
-def getdiff():
-    test_lst=dict()
-    with open('../alltj_result','r') as testfile:
-        for line in testfile.readlines():
-            test=eval(line)
-            num=test['num']
-            test_lst[num]=test
-    with open('../alltj_result1','r') as resfile,open('diff','a') as diffres:
-        for line in resfile.readlines():
-            base=eval(line)
-            num=base['num']
-            if num in test_lst:
-                if base!=test_lst[num]:
-                    diffres.write('base:'+str(base)+'\ntest:' +str(test_lst[num])+'\n')
+def getAllDiff(diffbase,difftest):
+    diff=difflib.HtmlDiff.make_file(difflib.HtmlDiff(),diffbase.splitlines(keepends=True),difftest.splitlines(keepends=True))
+    soup = BeautifulSoup(diff, "html.parser")
+    alltd=soup.tr.find_all('td')
+    for line in alltd:
+        if "nowrap" in str(line):
+            difflist.append("<tr>"+str(line)+"</tr>")
 
-def getDiff():
-    #with open('../alltj_result','r') as str1,open('../alltj_result1','r') as str2:
-    str1='abcdaf ghda12314 24325'
-    str2='abcdef ghdaa12314 2325'
-    diff=difflib.HtmlDiff.make_file(difflib.HtmlDiff(),str1,str2)
-#    print diff
-#    diff=BeautifulSoup(diff)
-#    diff=diff.prettify()
-    k = BeautifulSoup(diff, "html.parser")
+
+def gethtmlDiff(diffbase,difftest):
+    diff=difflib.HtmlDiff.make_file(difflib.HtmlDiff(),diffbase.splitlines(keepends=True),difftest.splitlines(keepends=True))
+    with open('diff_test.html','w',encoding='utf-8') as r:
+        r.write(diff) 
     
-    with open('aaa.html','w') as test:
-        test.write(diff)
-#    print diff
-#    diffres.write(diff)
-    res1=list()
-    res2=list()
-    i='0'
-    for sub in k.descendants:
-#        #print k.descendants
-#        print sub
-        if sub.name=='td':
-            try:
-                if sub['nowrap']=='nowrap':
-                    print sub
-                    if i=='0':
-                        res1.append(sub.contents)
-                        i='1'
-                        continue
-                    if i=='1':
-                        res2.append(sub.contends)
-                        i='0'
-                        continue
-            except Exception,e:
-                #print e
-                pass
-    print res1
-    print res2    
 
-def getHtmlDiff():
-    test_lst=dict()
+def getHtmlDiff(base):
+    base_dic=dict()
+    test_dic=dict()
+    global lentest
+    global lenbase
     global diffbase
     global difftest
-    with open('../alltj_result','r') as testfile:
-        for line in testfile.readlines():
-            test=eval(line)
-            num=test['num']
-            test_lst[num]=test
-    with open('../alltj_result1','r') as resfile:
-        for line in resfile.readlines():
-            base=eval(line)
-            num=base['num']
-            if num in test_lst:
-                if base!=test_lst[num]:
-#                    diffres.write('base:'+str(base)+'\ntest:' +str(test_lst[num])+'\n')
-                    diffbase=base
-                    difftest=test_lst[num]
-    parent=os.getcwd()
-#    print parent
-#   subprocess.Popen('rm -f diff.html',cwd=parent,stdout = None,stderr = None, shell = True)
-#   with open('../alltj_result','r') as testfile,open('../alltj_result1','r') as resfile,open('diff.html','w') as diffres: 
-#   wrapcolumn=100
+    #read base file and transfer to a dict
+    with open('../alltj_result','r',encoding='utf-8') as basef:
+        try:
+            while True:
+                baseline=basef.readline().strip()
+                if baseline:
+                    base=eval(baseline)
+                    num=base['num']
+                    base_dic[num]=base
+                else:
+                    lenbase=len(base_dic)
+                    break
+        except Exceptions as e:
+            print(e)
+
+    #read test file and transfer to a dict
+    with open('../alltj_result1','r',encoding='utf-8') as testf:
+        try:
+            while True:
+                testline=testf.readline()
+                if testline:
+                    test=eval(testline)
+                    num=test['num']
+                    test_dic[num]=test
+                else:
+                    lentest=len(test_dic)
+                    break
+        except Exceptions as e:
+            print(e)
+    diffcount=0
+    samecount=0
+    if lentest>=lenbase:
+        for key in test_dic:
+            if key in base_dic:
+                if test_dic[key]!=base_dic[key]:
+                    diffcount+=1
+                    diffbase=str(base_dic[key])
+                    difftest=str(test_dic[key])
+                    getAllDiff(diffbase,difftest)
+                else:
+                    samecount+=1
+            else:
+                diffcount+=1
+                diffbase='have no result'
+                difftest=str(test_dic[key])
+                getAllDiff(diffbase,difftest)
+    else:
+        for key in base_dic: 
+            if key in test_dic:
+                if test_dic[key]!=base_dic[key]:
+                    diffcount+=1
+                    diffbase=str(base_dic[key])
+                    difftest=str(test_dic[key])
+                    getAllDiff(diffbase,difftest)
+                else:
+                    samecount+=1
+            else:
+                diffcount+=1
+                difftest='have no result'
+                diffbase=str(test_dic[key])
+                getAllDiff(diffbase,difftest)
+    genReport()
+
     
-#    print type(testfile)
-    print diffbase
-    print difftest
-    diff=difflib.HtmlDiff.make_file(difflib.HtmlDiff(),diffbase,difftest)
-    k = BeautifulSoup(diff, "html.parser")
-    #print k
-    with open('diff.html','w') as diffres:
-        diffres.write(diff)
-    res1=list()
-    res2=list()
-    i='0'
-    for sub in k.descendants:
-    #print k.descendants
-        if sub.name=='td':
-            try:
-                if sub['nowrap']=='nowrap':
-                    if i=='0':
-                        #print sub.contents
-                        pass 
-            except Exception,e:
-                pass
-    subprocess.Popen('cp -f diff.html /search/odin/nginx/html/fy/',cwd=parent,stdout = None,stderr = None, shell = True)
+def genReport():
+    parent=os.getcwd()
+    with open('diffreport.html','w',encoding='utf-8') as report:
+        report.write(header)
+    with open('diffreport.html','a',encoding='utf-8') as diffreport:
+        for line in difflist:
+            diffreport.write(line)
+        diffreport.write(ender)
+    subprocess.Popen('cp -f diffreport.html /search/nginx/html/fy/',cwd=parent,stdout = None,stderr = None, shell = True)
+
+
+global header
+global ender
+
+header='''
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title></title>
+<style type="text/css">
+table.diff {font-family:Courier; border:medium;}
+.diff_header {background-color:#e0e0e0}
+td.diff_header {text-align:right}
+.diff_next {background-color:#c0c0c0}
+.diff_add {background-color:#aaffaa}
+.diff_chg {background-color:#ffff77}
+.diff_sub {background-color:#ffaaaa}
+</style>
+</head>
+<body>
+<table class="diff" summary="Legends">
+<tbody>
+<tr> <td> <table border="" summary="Colors">
+<tbody>
+<tr><td class="diff_add">&nbsp;Added&nbsp;</td><td>(f)irst change</td><td class="diff_chg">Changed</td><td>(n)ext change</td><td class="diff_sub">Deleted</td><td>(t)op</td></tr>
+</tbody></table></td>
+</tr>
+</tbody></table><table class="diff" id="difflib_chg_to0__top" cellspacing="0" cellpadding="0" rules="groups">
+<tbody>
+'''
+ender='''
+</tbody>
+</table>
+</body></html>
+'''
+
 if __name__ == '__main__':
-#    a='abcdefg hello word'
-#    b='abccefg hEllo Worf'
-#    s=difflib.SequenceMatcher(None,a,b)
-#    print(s.get_matching_blocks())
-#    print a,'\n',b
-#    print(s.get_opcodes())
-#    print(list(difflib.Differ().compare(a,b)))
-    getHtmlDiff()
+#    getHtmlDiff()
+#    parent=os.getcwd()
+#    str1='''<document expiretime="600000" location="0" request_id="000000000021848e">'''
+#    str2='''<document expiretime="600000" location="0" request_id="0000000000d3f01d">'''
+#    gethtmlDiff(str1,str2) 
+#    subprocess.Popen('cp -f diff_test.html /search/nginx/html/fy/',cwd=parent,stdout = None,stderr = None, shell = True)
