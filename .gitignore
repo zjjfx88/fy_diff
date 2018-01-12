@@ -4,4 +4,4 @@ json
 lib/*.pyc
 xml
 lib/__pycache__
-
+lib/__init__.py
